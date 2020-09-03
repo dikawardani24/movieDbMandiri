@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/purple_700"
+        android:orientation="vertical"
+        tools:context=".ui.activity.movieList.MovieListActivity">
+
+        <include
+            android:id="@+id/noDataContainer"
+            layout="@layout/no_data"
+            android:visibility="gone"/>
+
+        <include
+            android:id="@+id/loadingDataContainer"
+            layout="@layout/loading_data"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dataRv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/item_movie"
+            android:visibility="visible"/>
+
+    </LinearLayout>
+</layout>

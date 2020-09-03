@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="wardani.dika.moviedbmandiri">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".DikaApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MovieDBMandiri"
+        tools:ignore="AllowBackup">
+        <activity android:name=".ui.activity.genreList.GenreListActivity"
+            android:theme="@style/Theme.MovieDBMandiriNoActionBar"/>
+        <activity android:name=".ui.activity.movieDetail.MovieDetailActivity"
+            android:theme="@style/Theme.MovieDBMandiriNoActionBar"/>
+        <activity android:name=".ui.activity.movieList.MovieListActivity"/>
+        <activity android:name=".ui.activity.SplashScreenActivity"
+            android:theme="@style/Theme.MovieDBMandiriNoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
