@@ -1,31 +1,31 @@
 package wardani.dika.moviedbmandiri.ui.activity.movieList
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
-import android.view.MenuItem
+import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import wardani.dika.moviedbmandiri.R
 import wardani.dika.moviedbmandiri.api.ApiFactory
-import wardani.dika.moviedbmandiri.databinding.ActivityMovieListBinding
+import wardani.dika.moviedbmandiri.databinding.FragmentMovieListBinding
 import wardani.dika.moviedbmandiri.model.Genre
 import wardani.dika.moviedbmandiri.model.Movie
 import wardani.dika.moviedbmandiri.repository.RepositoryFactory
 import wardani.dika.moviedbmandiri.ui.State
-import wardani.dika.moviedbmandiri.ui.activity.movieDetail.MovieDetailActivity
+import wardani.dika.moviedbmandiri.ui.activity.movieDetail.MovieDetailFragmentArgs
 import wardani.dika.moviedbmandiri.ui.adapter.ItemMovieAdapter
 import wardani.dika.moviedbmandiri.ui.adapter.PagingAdapter
 import wardani.dika.moviedbmandiri.ui.listener.OnItemAdapterClickedListener
 import wardani.dika.moviedbmandiri.ui.listener.ScrollListener
 import wardani.dika.moviedbmandiri.util.showWarning
-import wardani.dika.moviedbmandiri.util.startActivity
-import wardani.dika.moviedbmandiri.util.updateAndroidSecurityProvider
 
-class MovieListActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMovieListBinding
+class MovieListFragment : Fragment() {
+    private lateinit var binding: FragmentMovieListBinding
     private lateinit var adapter: ItemMovieAdapter
     private lateinit var viewModel: MovieListViewModel
     private lateinit var scrollListener: ScrollListener
@@ -78,7 +78,7 @@ class MovieListActivity : AppCompatActivity() {
 
                 scrollListener.isLastPage = true
                 adapter.showError()
-                showWarning(it.errorMessage)
+                requireActivity().showWarning(it.errorMessage)
             }
         }
     }
@@ -103,24 +103,19 @@ class MovieListActivity : AppCompatActivity() {
             is State.ErrorOccurred -> {
                 showLoadingDataView(false)
                 showNoDataView(true)
-                showWarning(it.errorMessage)
+                requireActivity().showWarning(it.errorMessage)
             }
         }
     }
 
     private fun initViewModel(genre: Genre?) {
-        val api = ApiFactory.createMovieDbApi(this)
-        val repository = RepositoryFactory.createMovieRepository(api)
-        viewModel = MovieListViewModel(application, repository, genre)
+        val api = ApiFactory.createMovieDbApi(requireContext())
+        val repository = RepositoryFactory.createMovieListRepository(api)
+        viewModel = MovieListViewModel(requireActivity().application, repository, genre)
     }
 
     @SuppressLint("SetTextI18n")
     private fun initView() {
-        supportActionBar?.run {
-            setHomeAsUpIndicator(R.drawable.ic_baseline_keyboard_arrow_left_24)
-            setDisplayHomeAsUpEnabled(true)
-        }
-
         binding.noDataContainer.messageError.text = "No Data Movie Available"
 
         adapter = ItemMovieAdapter()
@@ -132,15 +127,14 @@ class MovieListActivity : AppCompatActivity() {
 
         adapter.onItemAdapterClickedListener = object : OnItemAdapterClickedListener<Movie> {
             override fun onItemAdapterClicked(item: Movie) {
-                startActivity(MovieDetailActivity::class) {
-                    putExtra(MovieDetailActivity.MOVIE_KEY, item.id)
-                }
+                val args = MovieDetailFragmentArgs(item.id).toBundle()
+                findNavController().navigate(R.id.toDetailMovie, args)
             }
         }
 
         val dataRv = binding.dataRv
         dataRv.adapter = adapter
-        val layoutManager = LinearLayoutManager(this@MovieListActivity)
+        val layoutManager = LinearLayoutManager(requireContext())
         dataRv.layoutManager = layoutManager
         scrollListener = ScrollListener(layoutManager, object : ScrollListener.OnLoadMoreListener {
             override fun onLoadMoreItems() {
@@ -151,10 +145,10 @@ class MovieListActivity : AppCompatActivity() {
         dataRv.addOnScrollListener(scrollListener)
 
         viewModel.run {
-            loadMovieDataNew.observe(this@MovieListActivity) {
+            loadMovieDataNew.observe(this@MovieListFragment) {
                 handleFirstLoadMovie(it)
             }
-            loadMoreMovieDataNew.observe(this@MovieListActivity) {
+            loadMoreMovieDataNew.observe(this@MovieListFragment) {
                 handleLoadMoreMovie(it)
             }
             binding.noDataContainer.retryBtn.setOnClickListener {
@@ -163,34 +157,22 @@ class MovieListActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            android.R.id.home -> {
-                viewModel.stop()
-                finish()
-            }
-        }
-        return super.onOptionsItemSelected(item)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_movie_list, container, false)
 
-    }
+        val args: MovieListFragmentArgs by navArgs()
+        val receivedGenre = args.genre
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_movie_list)
-
-        if (Build.VERSION.SDK_INT <= 19) {
-            updateAndroidSecurityProvider()
-        }
-
-        val receivedGenre: Genre? = when(val receivedData = intent.getSerializableExtra(KEY_GENRE)) {
-            is Genre -> receivedData
-            else -> null
-        }
-
-        title = receivedGenre?.name ?: getString(R.string.app_name)
+        requireActivity().title = receivedGenre.name
 
         initViewModel(receivedGenre)
         initView()
+
+        return binding.root
     }
 
     override fun onResume() {
@@ -201,9 +183,5 @@ class MovieListActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.stop()
-    }
-
-    companion object {
-        const val KEY_GENRE = "genre"
     }
 }

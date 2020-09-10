@@ -1,5 +1,6 @@
 package wardani.dika.moviedbmandiri.util
 
+import android.app.Activity
 import android.content.Intent
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -11,20 +12,20 @@ import wardani.dika.moviedbmandiri.R
 import kotlin.reflect.KClass
 
 
-fun AppCompatActivity.startActivity(kClass: KClass<*>, block: Intent.() -> Unit = {}) {
+fun Activity.startActivity(kClass: KClass<*>, block: Intent.() -> Unit = {}) {
     val intent = Intent(this, kClass.java)
     block(intent)
     startActivity(intent)
 }
 
-fun AppCompatActivity.showWarning(message: String?) {
+fun Activity.showWarning(message: String?) {
     val bottomSheetDialog = BottomSheetDialog(this)
     bottomSheetDialog.setContentView(R.layout.error_dialog)
     bottomSheetDialog.findViewById<TextView>(R.id.messageError)?.text = message
     bottomSheetDialog.show()
 }
 
-fun AppCompatActivity.updateAndroidSecurityProvider() {
+fun Activity.updateAndroidSecurityProvider() {
     try {
         ProviderInstaller.installIfNeeded(this)
     } catch (e: GooglePlayServicesRepairableException) {

@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:background="@color/purple_700"
         android:orientation="vertical"
-        tools:context=".ui.activity.movieList.MovieListActivity">
+        tools:context=".ui.activity.movieList.MovieListFragment">
 
         <include
             android:id="@+id/noDataContainer"

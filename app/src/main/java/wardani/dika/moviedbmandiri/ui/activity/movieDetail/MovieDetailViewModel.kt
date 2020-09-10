@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import wardani.dika.moviedbmandiri.model.Movie
 import wardani.dika.moviedbmandiri.model.Review
 import wardani.dika.moviedbmandiri.model.Video
-import wardani.dika.moviedbmandiri.repository.movie.MovieRepository
+import wardani.dika.moviedbmandiri.repository.movieDetail.MovieDetailRepository
 import wardani.dika.moviedbmandiri.ui.State
 import wardani.dika.moviedbmandiri.util.Result
 import java.math.BigInteger
@@ -18,7 +18,7 @@ import java.math.BigInteger
 class MovieDetailViewModel(
     application: Application,
     private val movieId: BigInteger?,
-    private val movieRepository: MovieRepository
+    private val movieDetailRepository: MovieDetailRepository
 ): AndroidViewModel(application) {
     val loadMovieDetailLiveData: LiveData<State<Movie>> = MutableLiveData()
     val loadVideosLiveData: LiveData<State<List<Video>>> = MutableLiveData()
@@ -35,7 +35,7 @@ class MovieDetailViewModel(
         liveData.postValue(State.Loading())
 
        if (movie != null) {
-           when(val result = movieRepository.getVideos(movie)) {
+           when(val result = movieDetailRepository.getVideos(movie)) {
                is Result.Success -> {
                    val videos = result.data
 
@@ -59,7 +59,7 @@ class MovieDetailViewModel(
     private suspend fun loadReviews(movie: Movie?, liveData: MutableLiveData<State<List<Review>>>) {
 
         if (movie != null) {
-            when(val result = movieRepository.getMovieReviews(movie, currentPageReview)) {
+            when(val result = movieDetailRepository.getMovieReviews(movie, currentPageReview)) {
                 is Result.Success -> {
                     val page = result.data
                     val reviews = page.content
@@ -111,7 +111,7 @@ class MovieDetailViewModel(
         if (movieId != null) {
             liveData.postValue(State.Loading())
             job = viewModelScope.launch {
-                when(val result = movieRepository.getMovieDetail(movieId)) {
+                when(val result = movieDetailRepository.getMovieDetail(movieId)) {
                     is Result.Success -> {
                         val movie = result.data
                         currentMovie = movie

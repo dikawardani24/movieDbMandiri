@@ -1,3 +1,2 @@
 rootProject.name = "Movie DB Mandiri"
 include ':app'
-include ':api'

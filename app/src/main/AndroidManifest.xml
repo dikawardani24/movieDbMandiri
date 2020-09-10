@@ -14,15 +14,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MovieDBMandiri"
         tools:ignore="AllowBackup">
-        <activity android:name=".ui.activity.genreList.GenreListActivity"
-            android:theme="@style/Theme.MovieDBMandiriNoActionBar"/>
-        <activity android:name=".ui.activity.movieDetail.MovieDetailActivity"
-            android:theme="@style/Theme.MovieDBMandiriNoActionBar"/>
-        <activity android:name=".ui.activity.movieList.MovieListActivity"/>
-        <activity android:name=".ui.activity.SplashScreenActivity"
+
+        <activity android:name=".ui.activity.MainActivity">
+            <nav-graph android:value="@navigation/movie_navigation" />
+        </activity>
+
+        <activity
+            android:name=".ui.activity.SplashScreenActivity"
             android:theme="@style/Theme.MovieDBMandiriNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

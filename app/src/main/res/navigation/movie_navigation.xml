@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/movie_navigation"
+    app:startDestination="@id/genreList">
+
+    <fragment android:id="@+id/genreList"
+        android:name="wardani.dika.moviedbmandiri.ui.activity.genreList.GenreListFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_genre_list">
+        <action
+            android:id="@+id/toMovieList"
+            app:destination="@id/movieList" />
+    </fragment>
+
+    <fragment android:id="@+id/movieList"
+        android:name="wardani.dika.moviedbmandiri.ui.activity.movieList.MovieListFragment"
+        android:label="Movie List"
+        tools:layout="@layout/fragment_movie_list">
+
+        <action android:id="@+id/toDetailMovie"
+            app:destination="@+id/movieDetail"/>
+
+        <argument android:name="genre"
+            app:argType="wardani.dika.moviedbmandiri.model.Genre" />
+
+    </fragment>
+
+    <fragment android:id="@+id/movieDetail"
+        android:name="wardani.dika.moviedbmandiri.ui.activity.movieDetail.MovieDetailFragment"
+        android:label="Moview Detail"
+        tools:layout="@layout/fragment_movie_detail">
+
+        <argument android:name="movieId"
+            app:argType="java.math.BigInteger" />
+
+    </fragment>
+</navigation>

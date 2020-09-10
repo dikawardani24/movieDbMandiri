@@ -1,12 +1,15 @@
 package wardani.dika.moviedbmandiri.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import wardani.dika.moviedbmandiri.api.response.GenreResponse
 import java.io.Serializable
 
+@Parcelize
 data class Genre(
         var id: Int,
         var name: String
-): Serializable {
+): Parcelable {
     companion object {
         fun from(genreId: Int): Genre {
             return Genre(

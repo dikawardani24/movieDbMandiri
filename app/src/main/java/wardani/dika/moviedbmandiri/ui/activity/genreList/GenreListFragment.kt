@@ -1,28 +1,28 @@
 package wardani.dika.moviedbmandiri.ui.activity.genreList
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import wardani.dika.moviedbmandiri.R
 import wardani.dika.moviedbmandiri.api.ApiFactory
-import wardani.dika.moviedbmandiri.databinding.ActivityGenreListBinding
+import wardani.dika.moviedbmandiri.databinding.FragmentGenreListBinding
 import wardani.dika.moviedbmandiri.model.Genre
 import wardani.dika.moviedbmandiri.repository.RepositoryFactory
 import wardani.dika.moviedbmandiri.ui.State
-import wardani.dika.moviedbmandiri.ui.activity.movieList.MovieListActivity
+import wardani.dika.moviedbmandiri.ui.activity.movieList.MovieListFragmentArgs
 import wardani.dika.moviedbmandiri.ui.adapter.ItemGenreAdapter
 import wardani.dika.moviedbmandiri.ui.listener.OnItemAdapterClickedListener
 import wardani.dika.moviedbmandiri.util.showWarning
-import wardani.dika.moviedbmandiri.util.startActivity
-import wardani.dika.moviedbmandiri.util.updateAndroidSecurityProvider
 
-class GenreListActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityGenreListBinding
+class GenreListFragment : Fragment() {
+    private lateinit var binding: FragmentGenreListBinding
     private lateinit var adapter: ItemGenreAdapter
     private lateinit var viewModel: GenreListViewModel
 
@@ -70,15 +70,15 @@ class GenreListActivity : AppCompatActivity() {
                 showLoadingDataView(false)
                 showNoDataView(true)
                 showDataView(false)
-                showWarning(it.errorMessage)
+                requireActivity().showWarning(it.errorMessage)
             }
         }
     }
 
     private fun initViewModel() {
-        val api = ApiFactory.createMovieDbApi(this)
-        val repository = RepositoryFactory.createMovieRepository(api)
-        viewModel = GenreListViewModel(application, repository)
+        val api = ApiFactory.createMovieDbApi(requireContext())
+        val repository = RepositoryFactory.createGenreRepository(api)
+        viewModel = GenreListViewModel(requireActivity().application, repository)
     }
 
     @SuppressLint("SetTextI18n")
@@ -88,36 +88,37 @@ class GenreListActivity : AppCompatActivity() {
         adapter = ItemGenreAdapter()
         adapter.onItemAdapterClickedListener = object : OnItemAdapterClickedListener<Genre> {
             override fun onItemAdapterClicked(item: Genre) {
-                startActivity(MovieListActivity::class) {
-                    putExtra(MovieListActivity.KEY_GENRE, item)
-                }
+                val args = MovieListFragmentArgs(item).toBundle()
+                findNavController().navigate(R.id.toMovieList, args)
             }
         }
 
         val dataView = binding.genreRv
         dataView.adapter = adapter
-        val layoutManager = GridLayoutManager(this, 3)
+        val layoutManager = GridLayoutManager(requireContext(), 3)
         dataView.layoutManager = layoutManager
     }
 
     private fun initListener() {
         viewModel.run {
-            genreListLiveData.observe(this@GenreListActivity) { handleLoadGenre(it) }
+            genreListLiveData.observe(this@GenreListFragment) { handleLoadGenre(it) }
             binding.noDataContainer.retryBtn.setOnClickListener { loadDataGenre() }
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_genre_list)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
-        if (Build.VERSION.SDK_INT <= 19) {
-            updateAndroidSecurityProvider()
-        }
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_genre_list, container, false)
 
         initViewModel()
         initView()
         initListener()
+
+        return binding.root
     }
 
     override fun onResume() {

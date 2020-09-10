@@ -24,5 +24,4 @@ class ItemMovieAdapter: PagingAdapter<Movie>() {
             holder.bind(value, onItemAdapterClickedListener)
         }
     }
-
 }

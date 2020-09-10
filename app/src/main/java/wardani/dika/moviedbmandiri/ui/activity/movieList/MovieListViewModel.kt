@@ -9,14 +9,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import wardani.dika.moviedbmandiri.model.Genre
 import wardani.dika.moviedbmandiri.model.Movie
-import wardani.dika.moviedbmandiri.repository.movie.MovieRepository
+import wardani.dika.moviedbmandiri.repository.movieList.MovieListRepository
 import wardani.dika.moviedbmandiri.ui.State
 import wardani.dika.moviedbmandiri.util.Result
 
 class MovieListViewModel(
-    application: Application,
-    private val movieRepository: MovieRepository,
-    private val genre: Genre?
+        application: Application,
+        private val movieListRepository: MovieListRepository,
+        private val genre: Genre?
 ) : AndroidViewModel(application) {
     val loadMovieDataNew: LiveData<State<List<Movie>>> = MutableLiveData()
     val loadMoreMovieDataNew: LiveData<State<List<Movie>>> = MutableLiveData()
@@ -31,7 +31,7 @@ class MovieListViewModel(
         val selectedGenre = genre
         if (selectedGenre != null) {
             job = viewModelScope.launch {
-                val result = movieRepository.getPageMoviesByGenre(
+                val result = movieListRepository.getPageMoviesByGenre(
                     genre = selectedGenre,
                     pageNumber = currentPage
                 )

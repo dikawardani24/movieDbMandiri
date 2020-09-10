@@ -8,13 +8,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import wardani.dika.moviedbmandiri.model.Genre
-import wardani.dika.moviedbmandiri.repository.movie.MovieRepository
+import wardani.dika.moviedbmandiri.repository.genre.GenreRepository
 import wardani.dika.moviedbmandiri.ui.State
 import wardani.dika.moviedbmandiri.util.Result
 
 class GenreListViewModel(
     application: Application,
-    private val movieRepository: MovieRepository
+    private val genreRepository: GenreRepository
 ): AndroidViewModel(application) {
     val genreListLiveData: LiveData<State<List<Genre>>> = MutableLiveData()
     private var job: Job? = null
@@ -24,7 +24,7 @@ class GenreListViewModel(
         liveData.postValue(State.Loading())
 
         job = viewModelScope.launch {
-            when(val result = movieRepository.getListGenre()) {
+            when(val result = genreRepository.getListGenre()) {
                 is Result.Success -> {
                     val genres = result.data
 

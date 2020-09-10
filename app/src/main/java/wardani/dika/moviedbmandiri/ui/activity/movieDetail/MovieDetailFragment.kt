@@ -5,17 +5,18 @@ package wardani.dika.moviedbmandiri.ui.activity.movieDetail
 import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.view.MenuItem
+import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.squareup.picasso.Picasso
 import wardani.dika.moviedbmandiri.R
 import wardani.dika.moviedbmandiri.api.ApiFactory
-import wardani.dika.moviedbmandiri.databinding.ActivityMovieDetailBinding
+import wardani.dika.moviedbmandiri.databinding.FragmentMovieDetailBinding
 import wardani.dika.moviedbmandiri.model.Movie
 import wardani.dika.moviedbmandiri.model.Review
 import wardani.dika.moviedbmandiri.model.Video
@@ -28,12 +29,10 @@ import wardani.dika.moviedbmandiri.ui.listener.OnItemAdapterClickedListener
 import wardani.dika.moviedbmandiri.ui.listener.ScrollListener
 import wardani.dika.moviedbmandiri.util.DateFormatterHelper
 import wardani.dika.moviedbmandiri.util.showWarning
-import wardani.dika.moviedbmandiri.util.updateAndroidSecurityProvider
-import java.math.BigInteger
 import java.util.*
 
-class MovieDetailActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMovieDetailBinding
+class MovieDetailFragment : Fragment() {
+    private lateinit var binding: FragmentMovieDetailBinding
     private lateinit var videoAdapter: ItemVideoAdapter
     private lateinit var reviewAdapter: ItemReviewAdapter
     private lateinit var scrollListener: ScrollListener
@@ -134,7 +133,7 @@ class MovieDetailActivity : AppCompatActivity() {
             is State.ErrorOccurred -> {
                 showLoadingReview(false)
                 showDataViewForReview(false)
-                showWarning(state.errorMessage)
+                requireActivity().showWarning(state.errorMessage)
             }
         }
     }
@@ -159,7 +158,7 @@ class MovieDetailActivity : AppCompatActivity() {
                 scrollListener.isLoading = false
                 scrollListener.isLastPage = true
                 reviewAdapter.closeLoading()
-                showWarning(state.errorMessage)
+                requireActivity().showWarning(state.errorMessage)
             }
         }
     }
@@ -179,7 +178,7 @@ class MovieDetailActivity : AppCompatActivity() {
             is State.ErrorOccurred -> {
                 showLoadingVideos(false)
                 showDataViewForVideos(false)
-                showWarning(state.errorMessage)
+                requireActivity().showWarning(state.errorMessage)
             }
         }
     }
@@ -199,38 +198,33 @@ class MovieDetailActivity : AppCompatActivity() {
             is State.ErrorOccurred -> {
                 showLoadingDetail(false)
                 showNoDataDetailView(true)
-                showWarning(state.errorMessage)
+                requireActivity().showWarning(state.errorMessage)
             }
         }
     }
 
     private fun initViewModel() {
-        val receivedData = intent.getSerializableExtra(MOVIE_KEY)
-        val movieId = if (receivedData is BigInteger) receivedData else null
+        val args: MovieDetailFragmentArgs by navArgs()
+        val movieId = args.movieId
 
-        val api = ApiFactory.createMovieDbApi(this)
-        val repository = RepositoryFactory.createMovieRepository(api)
+        val api = ApiFactory.createMovieDbApi(requireContext())
+        val repository = RepositoryFactory.createMovieDetailRepository(api)
         viewModel = MovieDetailViewModel(
-            application = application,
-            movieRepository = repository,
+            application = requireActivity().application,
+            movieDetailRepository = repository,
             movieId = movieId
         )
     }
 
     private fun initView() {
         binding.toolbar.title = ""
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.run {
-            setHomeAsUpIndicator(R.drawable.ic_baseline_keyboard_arrow_left_24)
-            setDisplayHomeAsUpEnabled(true)
-        }
 
-        loadingDetail = ProgressDialog(this)
+        loadingDetail = ProgressDialog(requireContext())
         loadingDetail.setTitle("Loading Detail Movie")
         loadingDetail.setMessage("Please wait...")
 
         binding.movieReviewContainer.run {
-            val layoutManagerReview = LinearLayoutManager(this@MovieDetailActivity)
+            val layoutManagerReview = LinearLayoutManager(requireContext())
             scrollListener =
                 ScrollListener(layoutManagerReview, object : ScrollListener.OnLoadMoreListener {
                     override fun onLoadMoreItems() {
@@ -249,7 +243,7 @@ class MovieDetailActivity : AppCompatActivity() {
         }
 
         binding.movieVideosContainer.run {
-            val layoutManagerVideos = LinearLayoutManager(this@MovieDetailActivity)
+            val layoutManagerVideos = LinearLayoutManager(requireContext())
             videoAdapter = ItemVideoAdapter()
             videoAdapter.onItemAdapterClickedListener = object : OnItemAdapterClickedListener<Video> {
                 override fun onItemAdapterClicked(item: Video) {
@@ -258,7 +252,7 @@ class MovieDetailActivity : AppCompatActivity() {
                         intent.data = Uri.parse("https://www.youtube.com/watch?v=${item.key}")
                         startActivity(intent)
                     } else {
-                        showWarning("Showing video from ${item.site} is not supported")
+                        requireActivity().showWarning("Showing video from ${item.site} is not supported")
                     }
                 }
             }
@@ -269,33 +263,24 @@ class MovieDetailActivity : AppCompatActivity() {
         }
 
         viewModel.run {
-            loadMovieDetailLiveData.observe(this@MovieDetailActivity) { handleDetailData(it) }
-            loadVideosLiveData.observe(this@MovieDetailActivity) { handleVideoState(it) }
-            loadReviewLiveData.observe(this@MovieDetailActivity) { handleReviewState(it) }
-            loadMoreReviewLiveData.observe(this@MovieDetailActivity) { handleLoadMoreReviewState(it) }
+            loadMovieDetailLiveData.observe(this@MovieDetailFragment) { handleDetailData(it) }
+            loadVideosLiveData.observe(this@MovieDetailFragment) { handleVideoState(it) }
+            loadReviewLiveData.observe(this@MovieDetailFragment) { handleReviewState(it) }
+            loadMoreReviewLiveData.observe(this@MovieDetailFragment) { handleLoadMoreReviewState(it) }
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            android.R.id.home -> {
-                viewModel.stop()
-                finish()
-            }
-        }
-        return super.onOptionsItemSelected(item)
-
-    }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_movie_detail)
-
-        if (Build.VERSION.SDK_INT <= 19) {
-            updateAndroidSecurityProvider()
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_movie_detail, container, false)
 
         initViewModel()
         initView()
+
+        return binding.root
     }
 
     override fun onResume() {
@@ -303,7 +288,4 @@ class MovieDetailActivity : AppCompatActivity() {
         viewModel.loadDetailMovie()
     }
 
-    companion object {
-        const val MOVIE_KEY = "movie"
-    }
 }

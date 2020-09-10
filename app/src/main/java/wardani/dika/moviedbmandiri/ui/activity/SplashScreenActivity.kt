@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import wardani.dika.moviedbmandiri.R
 import wardani.dika.moviedbmandiri.databinding.ActivitySplashScreenBinding
-import wardani.dika.moviedbmandiri.ui.activity.genreList.GenreListActivity
 import wardani.dika.moviedbmandiri.util.startActivity
 
 class SplashScreenActivity : AppCompatActivity() {
@@ -39,7 +38,7 @@ class SplashScreenActivity : AppCompatActivity() {
             currentProgress += 10
             progressBar.progress = currentProgress
             if (currentProgress > 100) {
-                activity.startActivity(GenreListActivity::class)
+                activity.startActivity(MainActivity::class)
                 activity.finish()
             } else {
                 updateProgress()
