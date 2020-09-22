@@ -12,7 +12,7 @@ buildscript {
         okhttp_version = "3.13.10"
 
         navigationVersion = "2.1.0"
-
+        dagger_version = "2.27"
     }
 
     repositories {
