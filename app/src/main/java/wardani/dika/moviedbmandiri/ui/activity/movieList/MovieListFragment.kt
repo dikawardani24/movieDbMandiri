@@ -2,6 +2,7 @@ package wardani.dika.moviedbmandiri.ui.activity.movieList
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import wardani.dika.moviedbmandiri.ui.adapter.ItemMovieAdapter
 import wardani.dika.moviedbmandiri.ui.adapter.PagingAdapter
 import wardani.dika.moviedbmandiri.ui.listener.OnItemAdapterClickedListener
 import wardani.dika.moviedbmandiri.ui.listener.ScrollListener
+import wardani.dika.moviedbmandiri.util.JSonHelper
 import wardani.dika.moviedbmandiri.util.showWarning
 
 class MovieListFragment : Fragment() {
@@ -161,20 +163,22 @@ class MovieListFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_movie_list, container, false)
-
-        val args: MovieListFragmentArgs by navArgs()
-        val receivedGenre = args.genre
-
-        requireActivity().title = receivedGenre.name
-
-        initViewModel(receivedGenre)
-        initView()
-
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val args: MovieListFragmentArgs by navArgs()
+        val receivedGenre = args.genre
+
+        findNavController().currentDestination?.label = receivedGenre.name
+        Log.d(TAG, "onViewCreated: ${JSonHelper.toJson(receivedGenre)}")
+        initViewModel(receivedGenre)
+        initView()
+
+    }
     override fun onResume() {
         super.onResume()
         viewModel.loadDataMovie()
@@ -183,5 +187,9 @@ class MovieListFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.stop()
+    }
+
+    companion object {
+        private const val TAG = "MovieListFragment"
     }
 }

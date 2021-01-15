@@ -9,12 +9,6 @@
         tools:context=".ui.activity.MainActivity"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="@string/app_name"
-            android:background="@null"/>
-
         <fragment
             android:id="@+id/navigationHost"
             android:name="androidx.navigation.fragment.NavHostFragment"

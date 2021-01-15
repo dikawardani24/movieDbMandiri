@@ -25,9 +25,6 @@ class MainActivity : AppCompatActivity() {
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        navController.addOnDestinationChangedListener { controller, destination, arguments ->
-
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
